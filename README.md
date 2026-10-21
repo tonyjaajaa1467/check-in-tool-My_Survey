@@ -60,7 +60,7 @@ cp .env.example .env
 `.env` 文件至少需要设置：
 
 ```bash
-DOWNLOAD_PASSWORD=your_secure_password
+DOWNLOAD_PASSWORD=your_download_password
 SSL_CERT_PATH=ssl/cert.pem
 SSL_KEY_PATH=ssl/key.pem
 PORT="5001"
