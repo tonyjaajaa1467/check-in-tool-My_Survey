@@ -1,6 +1,6 @@
 # My_Survey 问卷式打卡工具
 
-*轻量级表单提交与数据管理系统，基于 Flask + HTTPS*
+*轻量级表单提交与数据管理系统，基于 Python + Flask + HTTPS*
 
 ---
 
