@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>问卷式打卡工具</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        form {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        .required::after {
+            content: ' *';
+            color: #dc2626;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group,
+        .checkbox-group.horizontal {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-group.horizontal {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .radio-group.horizontal {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .checkbox-group.horizontal .checkbox-item {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            flex: 0 0 auto;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .radio-item:hover,
+        .checkbox-item:hover {
+            background: #f3f4f6;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .rating {
+            display: flex;
+            gap: 5px;
+            font-size: 1.5rem;
+        }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.2s;
+        }
+
+        .rating input:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #fbbf24;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+        }
+
+        /* 提交记录相关按钮 - 增大尺寸 */
+        .btn-submissions-lg {
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+
+        .preview-section h3 {
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        #markdown-preview {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #059669;
+            border-left: 4px solid #059669;
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .alert-success .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: #059669;
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            form {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    /* Submissions data panel */
+    .submissions-panel {
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+        max-height: 1000px;
+        overflow-y: auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+    }
+    /* 自定义滚动条样式 */
+    .submissions-panel::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .submissions-panel::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    .submissions-panel::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .submissions-panel::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    .submissions-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        table-layout: auto; /* 自动列宽 */
+    }
+    .submissions-table th, .submissions-table td {
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        text-align: left;
+        white-space: nowrap; /* 保持单行，滚动时查看完整内容 */
+    }
+    .submissions-table th {
+        background: #f9fafb;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        cursor: pointer;
+        user-select: none;
+    }
+    .submissions-table th .sort-indicator {
+        margin-left: 4px;
+        opacity: 0.5;
+        font-size: 0.9em;
+        color: #4f46e5;
+    }
+    .submissions-table th.sort-asc .sort-indicator,
+    .submissions-table th.sort-desc .sort-indicator {
+        opacity: 1;
+        font-weight: bold;
+    }
+    .submissions-table td {
+        background: white;
+    }
+    .submissions-table tr:hover td {
+        background: #f3f4f6;
+    }
+    .submissions-empty, .submissions-loading {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+    }
+    /* 提交加载指示器 */
+    #submit-loading {
+        display: none;
+        text-align: center;
+        padding: 15px;
+        color: #4f46e5;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    #submit-loading .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #e5e7eb;
+        border-top-color: #4f46e5;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    /* 按钮组内的反馈元素样式 */
+    .button-group #submit-loading,
+    .button-group #alert-container {
+        flex: 0 0 100%;
+        margin-top: 8px;
+    }
+
+    /* 下拉菜单清除按钮 */
+    .select-with-clear {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+    .select-with-clear select {
+        padding-right: 24px !important; /* 为清除按钮留空间 */
+        min-width: 0; /* 防止 flex 子项溢出 */
+    }
+    .clear-select-btn {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        transform: translateY(-50%);
+        background: #e5e7eb;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        line-height: 1;
+        color: #666;
+        cursor: pointer;
+        display: none; /* 默认隐藏，有值时显示 */
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        z-index: 2;
+    }
+    .clear-select-btn:hover {
+        background: #d1d5db;
+        color: #333;
+    }
+    .select-with-clear.has-value .clear-select-btn {
+        display: flex;
+    }
+    /* Settings button */
+    .settings-btn {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid #4f46e5;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        z-index: 100;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .settings-btn:hover {
+        background: white;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    header {
+        position: relative;
+    }
+
+    /* Settings modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 25px;
+        position: relative;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    .modal-header h2 {
+        margin: 0;
+        color: #4f46e5;
+        font-size: 1.2rem;
+    }
+    .close-modal-btn {
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: #666;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    .close-modal-btn:hover {
+        background: #f3f4f6;
+        color: #333;
+    }
+    .settings-section {
+        margin-bottom: 20px;
+    }
+    .settings-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4f46e5;
+    }
+    .settings-section textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 10px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.9rem;
+        resize: vertical;
+    }
+    .settings-section textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e5e7eb;
+    }
+    .modal-actions button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    .password-input {
+        width: 200px;
+        padding: 8px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        margin-right: 10px;
+    }
+    .settings-message {
+        margin-bottom: 15px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .settings-message.error {
+        background: #fee2e2;
+        color: #dc2626;
+        border-left: 4px solid #dc2626;
+    }
+    .settings-message.success {
+        background: #d1fae5;
+        color: #059669;
+        border-left: 4px solid #059669;
+    }
+    .settings-message.info {
+        background: #dbeafe;
+        color: #1e40af;
+        border-left: 4px solid #1e40af;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button id="settings-btn" class="settings-btn" title="设置">⚙️ 設定</button>
+            <h1>问卷式打卡工具，记录自动上传到Server保存!</h1>
+        <p class="subtitle">请填写以下信息</p>
+        </header>
+
+        <form id="survey-form">
+
+            <!-- Name 欄位 -->
+            <div class="form-group">
+                <label for="name" class="required">1. Name</label>
+                <div class="select-with-clear" data-target="name">
+                    <select id="name" name="name" required>
+                        <option value="">请选择您的姓名</option>
+                    </select>
+                    <button type="button" class="clear-select-btn" data-target="name" title="清除选择">✕</button>
+                </div>
+            </div>
+
+            <!-- Date 欄位 -->
+            <div class="form-group">
+                <label for="date" class="required">2. Date</label>
+                <input type="date" id="date" name="date" required max="" inputmode="numeric" autocomplete="bdate" aria-label="选择日期，格式：YYYY-MM-DD" title="点击选择或手动输入日期" placeholder="YYYY-MM-DD">
+                <button type="button" id="update-date-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; margin-top: 8px;">📅 设为今天</button>
+            </div>
+
+            <!-- Weekend / Holiday 欄位 -->
+            <div class="form-group">
+                <label class="required">3. Weekend / Holiday</label>
+                <div class="select-with-clear" data-target="weekend_holiday">
+                    <select id="weekend_holiday" name="weekend_holiday" required>
+                        <option value="No" selected>No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                    <button type="button" class="clear-select-btn" data-target="weekend_holiday" title="清除选择">✕</button>
+                </div>
+            </div>
+
+            <!-- Session 欄位 -->
+            <div class="form-group">
+                <label class="required">4. Session (可多选)</label>
+                <div class="checkbox-group horizontal">
+                    <label class="checkbox-item"><input type="checkbox" name="session" value="AM"> AM</label>
+                    <label class="checkbox-item"><input type="checkbox" name="session" value="PM"> PM</label>
+                    <label class="checkbox-item"><input type="checkbox" name="session" value="Night"> Night</label>
+                </div>
+            </div>
+
+            <!-- Status 欄位 -->
+            <div class="form-group" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+                <div style="flex: 0 0 auto;">
+                    <label for="status" class="required">5. Status</label>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                        如請假 / Not on duty，第6至9項无需填写。
+                    </div>
+                </div>
+                <div class="select-with-clear" data-target="status" style="flex: 0 0 auto; width: 200px;">
+                    <select id="status" name="status" required style="width: 100%; padding-right: 24px;">
+                        <option value="">请选择您的状态</option>
+                    </select>
+                    <button type="button" class="clear-select-btn" data-target="status" title="清除选择">✕</button>
+                </div>
+                <!-- Status_Specify_Others 说明 - 初始隐藏，右侧显示 -->
+                <div id="status-specify-others-group" style="display: none; flex: 1; min-width: 200px;">
+                    <label for="status_specify_others" style="font-size: 0.85rem; color: black; font-style: italic;">Status - Please specify</label>
+                    <textarea id="status_specify_others" name="status_specify_others" rows="3" placeholder="请详细说明..." style="width: 100%;"></textarea>
+                </div>
+            </div>
+
+
+            <!-- Location 欄位 -->
+            <div class="form-group">
+                <div style="display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 0 0 auto;">
+                        <label>6. Location</label>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                            如选择 In the Office，第7至9项无需填写。
+                        </div>
+                    </div>
+                    <div class="checkbox-group horizontal">
+                        <label class="radio-item"><input type="radio" name="location" value="In the Office"> In the Office</label>
+                        <label class="radio-item"><input type="radio" name="location" value="Outside"> Outside</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPS 欄位 -->
+            <div class="form-group">
+                <label>7. GPS Location (可选)</label>
+                <div>
+                    <button type="button" id="get-location-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; margin-bottom: 8px;">📍 获取当前位置</button>
+                    <div id="location-display" style="margin-top: 8px; color: #666; font-size: 0.9rem; min-height: 24px;"></div>
+                    <div id="region-display" style="margin-top: 8px; color: #666; font-size: 0.9rem; min-height: 24px;"></div>
+                    <div id="map" style="height: 300px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; z-index: 1;"></div>
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+                    <input type="hidden" id="accuracy" name="accuracy">
+                    <input type="hidden" id="region" name="region">
+                    <!-- 手动地址输入 -->
+                    <div style="margin-top: 12px;">
+                        <input type="text" id="address-input" placeholder="输入地址 (例如：香港中环) 或地标名称" style="width: 70%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+                        <button type="button" id="geocode-manual-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; margin-left: 8px;">转换</button>
+                    </div>
+                    <div id="geocode-status" style="margin-top: 6px; color: #666; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+
+            <!-- Work 欄位 -->
+            <div class="form-group" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+                <label for="work" style="flex: 0 0 auto;">8. Work</label>
+                <div class="select-with-clear" data-target="work" style="flex: 0 0 auto; width: 200px;">
+                    <select id="work" name="work" style="width: 100%; padding-right: 24px;">
+                        <option value="">请选择工作类型</option>
+                    </select>
+                    <button type="button" class="clear-select-btn" data-target="work" title="清除选择">✕</button>
+                </div>
+                <!-- Work Specify Others 说明 - 初始隐藏，右侧显示 -->
+                <div id="work-specify-others-group" style="display: none; flex: 1; min-width: 200px;">
+                    <label for="work_specify_others" style="font-size: 0.85rem; color: black; font-style: italic;">Work - Please specify</label>
+                    <textarea id="work_specify_others" name="work_specify_others" rows="3" placeholder="请详细说明..." style="width: 100%;"></textarea>
+                </div>
+            </div>
+
+            <!-- Contract No. 欄位 -->
+            <div class="form-group" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+                <label for="contract_no" style="flex: 0 0 auto;">9. Contract No.</label>
+                <div class="select-with-clear" data-target="contract_no" style="flex: 0 0 auto; width: 200px;">
+                    <select id="contract_no" name="contract_no" style="width: 100%; padding-right: 24px;">
+                        <option value="">请选择合约编号</option>
+                    </select>
+                    <button type="button" class="clear-select-btn" data-target="contract_no" title="清除选择">✕</button>
+                </div>
+                <!-- Contract No. Specify Others 说明 -->
+                <div id="contract-specify-group" style="display: none; flex: 1; min-width: 200px;">
+                    <label for="contract_specify_others" style="font-size: 0.85rem; color: black; font-style: italic;">Contract No. - Please specify</label>
+                    <textarea id="contract_specify_others" name="contract_specify_others" rows="3" placeholder="请详细说明..." style="width: 100%;"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments / Remarks</label>
+                <textarea id="comments" name="comments" placeholder="请在此输入你的想法/備註..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">提交表单</button>
+
+                <!-- 提交加载指示器 -->
+                <div id="submit-loading">
+                    <span class="spinner"></span>正在提交...
+                </div>
+
+                <div id="alert-container"></div>
+
+                <button type="button" class="btn-secondary" id="reset-btn">🔄 重新填写</button>
+                <button type="button" class="btn-secondary" id="download-csv-btn">📥 下载所有数据 (CSV)</button>
+                <button type="button" class="btn-secondary btn-submissions-lg" id="view-submissions-btn">📊 查看提交记录</button>
+            </div>
+
+        </form>
+
+        <!-- Submissions data panel -->
+        <div id="submissions-panel" class="submissions-panel" style="display: none;">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; color:#4f46e5;">提交记录</h3>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="text" id="submission-search" placeholder="🔍 搜索..." style="padding:6px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+                        <button type="button" id="submission-search-clear" class="btn-secondary btn-submissions-lg" title="清空搜索">✕</button>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+                    <label for="submission-start-date" style="font-weight:500; color:#4f46e5;">开始：</label>
+                    <input type="date" id="submission-start-date" size="10" style="width: 200px; padding:6px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+                    <label for="submission-end-date" style="font-weight:500; color:#4f46e5;">结束：</label>
+                    <input type="date" id="submission-end-date" size="10" style="width: 200px; padding:6px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+                        <button type="button" id="refresh-table-btn" class="btn-secondary btn-submissions-lg" title="刷新表格" onclick="loadSubmissions()">🔄 刷新表格</button>
+                        <button type="button" id="export-filtered-btn" class="btn-secondary btn-submissions-lg" title="导出当前筛选结果">📥 导出筛选结果</button>
+                    <div style="margin-left:auto; display:flex; align-items:center; gap:4px; font-size:0.9rem;">
+                        <span id="pagination-info" style="color:#666;"></span>
+                        <button type="button" id="prev-page" class="btn-secondary btn-submissions-lg" title="上一页">◀</button>
+                        <button type="button" id="next-page" class="btn-secondary btn-submissions-lg" title="下一页">▶</button>
+                    </div>
+                </div>
+            </div>
+            <div style="max-height:500px; overflow-y:auto; overflow-x:auto;">
+                <table class="submissions-table" id="submissions-table">
+                    <thead>
+                        <tr>
+                            <th data-field="timestamp">提交时間<span class="sort-indicator"></span></th>
+                            <th data-field="name">姓名<span class="sort-indicator"></span></th>
+                            <th data-field="date">日期<span class="sort-indicator"></span></th>
+                            <th data-field="weekend_holiday">周末/假日<span class="sort-indicator"></span></th>
+                            <th data-field="session">班次<span class="sort-indicator"></span></th>
+                            <th data-field="status">状态<span class="sort-indicator"></span></th>
+                            <th data-field="status_specify_others">状态说明<span class="sort-indicator"></span></th>
+                            <th data-field="location">位置<span class="sort-indicator"></span></th>
+                            <th data-field="work">工作<span class="sort-indicator"></span></th>
+                            <th data-field="work_specify_others">工作说明<span class="sort-indicator"></span></th>
+                            <th data-field="contract_no">合同编号<span class="sort-indicator"></span></th>
+                            <th data-field="contract_specify_others">合同说明<span class="sort-indicator"></span></th>
+                    <th data-field="comments">备注<span class="sort-indicator"></span></th>
+                    <th data-field="actions">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="submissions-empty" class="submissions-empty" style="display:none; text-align:center; color:#666; padding:20px;">暂无数据</div>
+                <div id="submissions-loading" class="submissions-loading" style="display:none; text-align:center; color:#4f46e5; padding:20px;">加载中...</div>
+            </div>
+        </div>
+        </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+        <div class="modal-header">
+            <h2>⚙️ 選項設置</h2>
+            <button type="button" class="close-modal-btn" id="close-settings-btn">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-section">
+                <label for="settings-names">姓名列表 (每行一个)</label>
+                <textarea id="settings-names" placeholder="Tony\nDan\nCheng"></textarea>
+            </div>
+            <div class="settings-section">
+                <label for="settings-statuses">状态列表 (每行一个)</label>
+                <textarea id="settings-statuses" placeholder="On Duty\nAnnual Leave\n..."></textarea>
+            </div>
+            <div class="settings-section">
+                <label for="settings-work-types">工作类型列表 (每行一个)</label>
+                <textarea id="settings-work-types" placeholder="Preventive Maintenance (PM)\nCorrective Maintenance (CM)\n..."></textarea>
+            </div>
+            <div class="settings-section">
+                <label for="settings-contracts">合约编号列表 (每行一个)</label>
+                <textarea id="settings-contracts" placeholder="M1215-20E\nM1245-22E\n..."></textarea>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <input type="password" id="admin-password" class="password-input" placeholder="管理密码">
+            <button type="button" class="btn-secondary" id="cancel-settings-btn">取消</button>
+            <button type="button" class="btn-primary" id="save-settings-btn">💾 保存</button>
+        </div>
+            <div id="settings-message" class="settings-message" style="display:none;"></div>
+        </div>
+        </div>
+
+        <script>
+        // 设置默认日期为今天
+        const dateInput = document.getElementById('date');
+        dateInput.valueAsDate = new Date();
+
+        // 表单处理
+        const form = document.getElementById('survey-form');
+        const alertContainer = document.getElementById('alert-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const statusSelect = document.getElementById('status');
+        const statusSpecifyOthersGroup = document.getElementById('status-specify-others-group');
+        const statusSpecifyOthersInput = document.getElementById('status_specify_others');
+        const workSelect = document.getElementById('work');
+        const workSpecifyOthersGroup = document.getElementById('work-specify-others-group');
+        const workSpecifyOthersInput = document.getElementById('work_specify_others');
+        const contractNoSelect = document.getElementById('contract_no');
+        const contractSpecifyGroup = document.getElementById('contract-specify-group');
+        const contractSpecifyInput = document.getElementById('contract_specify_others');
+
+        // 统一从 JSON 配置文件加载所有选项
+        async function loadAllOptions() {
+            try {
+                const response = await fetch('/static/data/options.json');
+                if (!response.ok) throw new Error('加载配置文件失败: ' + response.status);
+                const options = await response.json();
+                
+                // 填充姓名
+                populateSelect('name', options.names, '请选择您的姓名');
+                // 填充状态
+                populateSelect('status', options.statuses, '请选择您的状态');
+                // 填充工作类型
+                populateSelect('work', options.work_types, '请选择工作类型');
+                // 填充合约编号
+                populateSelect('contract_no', options.contracts, '请选择合约编号');
+                
+                console.log('选项加载完成', options);
+            } catch (error) {
+                console.error('加载选项失败:', error);
+                // 可选：显示错误提示
+            }
+        }
+        
+        function populateSelect(selectId, options, placeholder) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            // 设置占位符
+            select.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+        }
+        
+        loadAllOptions();
+
+        // 监听Status变化，显示/隐藏Status Specify Others输入框
+        statusSelect.addEventListener('change', function() {
+            if (this.value === 'Other_Status') {
+                statusSpecifyOthersGroup.style.display = 'block';
+                statusSpecifyOthersInput.required = false; // 设为可选
+            } else {
+                statusSpecifyOthersGroup.style.display = 'none';
+                statusSpecifyOthersInput.required = false;
+                statusSpecifyOthersInput.value = ''; // 清空内容
+            }
+        });
+
+        // 监听Work变化，显示/隐藏Work Specify Others输入框
+        workSelect.addEventListener('change', function() {
+            if (this.value === 'Other_Work') {
+                workSpecifyOthersGroup.style.display = 'block';
+                workSpecifyOthersInput.required = false;
+            } else {
+                workSpecifyOthersGroup.style.display = 'none';
+                workSpecifyOthersInput.required = false;
+                workSpecifyOthersInput.value = '';
+            }
+        });
+
+        // 页面加载时检查初始状态
+        if (statusSelect.value === 'Other_Status') {
+            statusSpecifyOthersGroup.style.display = 'block';
+        }
+        if (workSelect.value === 'Other_Work') {
+            workSpecifyOthersGroup.style.display = 'block';
+        }
+        if (contractNoSelect.value === 'Other_Contract') {
+            contractSpecifyGroup.style.display = 'block';
+        }
+
+        // 监听Contract No.变化，显示/隐藏Specify Others输入框
+        contractNoSelect.addEventListener('change', function() {
+            if (this.value === 'Other_Contract') {
+                contractSpecifyGroup.style.display = 'block';
+                contractSpecifyInput.required = false;
+            } else {
+                contractSpecifyGroup.style.display = 'none';
+                contractSpecifyInput.required = false;
+                contractSpecifyInput.value = '';
+            }
+        });
+
+        function showAlert(message, type = 'error') {
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function getFormData() {
+            const form = document.getElementById('survey-form');
+            const formData = new FormData(form);
+
+            // 数据规范化：trim 字符串、转换数字、过滤空值
+            const data = {
+                name: (formData.get('name') || '').trim(),
+                date: formData.get('date') || '',
+                weekend_holiday: formData.get('weekend_holiday') || '',
+                session: (formData.getAll('session') || []).map(s => s.trim()).filter(Boolean),
+                status: formData.get('status') || '',
+                status_specify_others: (formData.get('status_specify_others') || '').trim(),
+                location: formData.get('location') || '',
+                work: formData.get('work') || '',
+                work_specify_others: (formData.get('work_specify_others') || '').trim(),
+                contract_no: formData.get('contract_no') || '',
+                contract_specify_others: (formData.get('contract_specify_others') || '').trim(),
+                comments: (formData.get('comments') || '').trim(),
+                latitude: parseFloat(formData.get('latitude')) || undefined,
+                longitude: parseFloat(formData.get('longitude')) || undefined,
+                accuracy: parseInt(formData.get('accuracy')) || undefined,
+                region: (formData.get('region') || '').trim()
+            };
+
+            return data;
+        }
+
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 检查必填字段
+            const requiredFields = form.querySelectorAll('[required]');
+            let allFilled = true;
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    allFilled = false;
+                    field.focus();
+                    field.style.borderColor = '#dc2626';
+                } else {
+                    field.style.borderColor = '#e5e7eb';
+                }
+            });
+
+            if (!allFilled) {
+                showAlert('请填写所有必填字段（标有 * 的项目）', 'error');
+                return;
+            }
+
+            // 检查 Session 至少选择一个
+            const sessionCheckboxes = form.querySelectorAll('input[name="session"]');
+            const sessionSelected = Array.from(sessionCheckboxes).some(cb => cb.checked);
+            if (!sessionSelected) {
+                showAlert('请至少选择一个 Session (AM/PM/Night)', 'error');
+                return;
+            }
+
+            // 获取并处理数据
+            const data = getFormData();
+
+            // 显示加载指示器
+            const submitLoading = document.getElementById('submit-loading');
+            submitLoading.style.display = 'block';
+
+            // 提交到後端
+            submitBtn.disabled = true;
+            resetBtn.disabled = true;
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = '提交中...';
+
+            fetch('/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // 隐藏加载指示器
+                submitLoading.style.display = 'none';
+
+                // 恢覆按钮状态
+                submitBtn.disabled = false;
+                resetBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+
+                if (result.success) {
+                    // 创建成功提示（增强版）
+                    alertContainer.innerHTML = '';
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+
+                    // 生成提交ID (若无后端返回，则使用时間戳)
+                    const submissionId = result.id || 'ID_' + Date.now();
+                    const now = new Date();
+                    const timeStr = now.toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    }).replace(/\//g, '-'); // 格式：YYYY-MM-DD HH:MM:SS
+
+                    alertDiv.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <strong style="font-size:1.1em;">✅ 提交成功</strong><br>
+                                <span style="font-size:0.9em; color:#059669;">
+                                    编号：${submissionId}<br>
+                                    时間：${timeStr}
+                                </span>
+                            </div>
+                            <button class="close-alert-btn" style="background:none;border:none;cursor:pointer;padding:4px;font-size:1.2rem;line-height:1;">✕</button>
+                        </div>
+                        <div class="progress-bar"></div>
+                    `;
+                    alertContainer.appendChild(alertDiv);
+
+                    // 进度条动画（8秒后消失）
+                    const progressBar = alertDiv.querySelector('.progress-bar');
+                    setTimeout(() => {
+                        progressBar.style.transition = 'width 8s linear';
+                        progressBar.style.width = '0%';
+                    }, 50);
+                    const autoCloseTimer = setTimeout(() => {
+                        alertDiv.remove();
+                    }, 8000); // 8秒后自动关闭
+
+                    // 关闭按钮事件
+                    alertDiv.querySelector('.close-alert-btn').addEventListener('click', function() {
+                        clearTimeout(autoCloseTimer);
+                        alertDiv.remove();
+                    });
+
+                    // 离线友好：成功后禁用提交按钮2秒，防止重覆提交
+                    submitBtn.disabled = true;
+                    resetBtn.disabled = true;
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        resetBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    showAlert('保存失败：' + (result.error || '未知错误'), 'error');
+                }
+            })
+            .catch(err => {
+                // 隐藏加载指示器
+                submitLoading.style.display = 'none';
+
+                // 恢覆按钮状态
+                submitBtn.disabled = false;
+                resetBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+                showAlert('网路错误：' + err.message, 'error');
+            });
+        });
+
+        resetBtn.addEventListener('click', function() {
+            form.reset();
+            document.getElementById('date').value = getHKDateString();
+            alertContainer.innerHTML = '';
+        });
+
+        // 获取香港今天的日期字符串 (YYYY-MM-DD)，强制使用香港时区 (UTC+8)
+        function getHKDateString() {
+            const now = new Date();
+            // 香港时间 = UTC + 8 小时
+            const hkTime = new Date(now.getTime() + 8 * 3600000);
+            const yyyy = hkTime.getUTCFullYear();
+            const mm = String(hkTime.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(hkTime.getUTCDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // 更新日期按钮
+        const updateDateBtn = document.getElementById('update-date-btn');
+        updateDateBtn.addEventListener('click', function() {
+            const dateStr = getHKDateString();
+            const dateInput = document.getElementById('date');
+            dateInput.value = dateStr;
+            dateInput.focus(); // 聚焦到输入框
+        });
+
+        // 下载 CSV（密码保护）
+        const downloadCsvBtn = document.getElementById('download-csv-btn');
+        downloadCsvBtn.addEventListener('click', function() {
+            const pwd = prompt('请输入下载密码：', '');
+            if (pwd === null) return;
+            // 创建隐藏表单进行 POST 提交，避免密码暴露在 URL 中
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/download_csv';
+            form.target = '_blank'; // 在新标签页打开下载
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'password';
+            input.value = pwd;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        });
+
+        // 添加输入边框样式重置
+        form.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', function() {
+                this.style.borderColor = '#e5e7eb';
+            });
+        });
+
+        // 获取地区信息（反向地理编码）
+        function fetchRegion(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+                headers: {
+                    'User-Agent': 'HermesSurvey/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const address = data.address || {};
+                // 提取各层级地址
+                const road = address.road || '';
+                const suburb = address.suburb || '';
+                const cityDistrict = address.city_district || '';
+                const city = address.city || address.town || address.county || address.state_district || address.village || '';
+                const state = address.state || '';
+                // 组合详细地址（按常见顺序：街道, 区域, 市区, 城市, 省）
+                const parts = [];
+                if (road) parts.push(road);
+                if (suburb && suburb !== road) parts.push(suburb);
+                if (cityDistrict && cityDistrict !== road && cityDistrict !== suburb) parts.push(cityDistrict);
+                if (city && city !== road && city !== suburb && city !== cityDistrict) parts.push(city);
+                if (state && state !== city && state !== suburb && state !== cityDistrict && state !== road) parts.push(state);
+                const detailedAddress = parts.join(', ');
+                // region 保存完整地址，若无则 fallback 到城市
+                const regionValue = detailedAddress || city || '未知地区';
+                document.getElementById('region').value = regionValue;
+                // 显示区域（若无详细地址则显示简略）
+                document.getElementById('region-display').innerHTML = detailedAddress ?
+                    `<span style="color: #059669;">📍 ${detailedAddress}</span>` :
+                    `<span style="color: #666;">📍 ${regionValue}</span>`;
+            })
+            .catch(error => {
+                console.error('地理编码失败:', error);
+                document.getElementById('region-display').innerHTML = '<span style="color: #dc2626;">⚠️ 无法获取地区信息</span>';
+            });
+        }
+        // 地图初始化 - 延迟到实际需要时（第一次定位）
+        let map = null;
+        let marker = null;
+        function initMap() {
+            if (map) return;
+            // 确保容器有尺寸
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) {
+                console.error('地图容器未找到');
+                return;
+            }
+            // 强制重排以确保尺寸正确
+            mapContainer.style.display = 'block';
+            // 创建地图实例
+            map = L.map('map').setView([22.3193, 114.1694], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            console.log('地图初始化完成');
+        }
+        function updateMap(lat, lng) {
+            if (!map) initMap();
+            const latLng = [parseFloat(lat), parseFloat(lng)];
+            if (marker) {
+                marker.setLatLng(latLng);
+            } else {
+                marker = L.marker(latLng).addTo(map);
+            }
+            map.setView(latLng, map.getZoom() || 13);
+        }
+
+        // GPS 定位功能
+        const getLocationBtn = document.getElementById('get-location-btn');
+        const locationDisplay = document.getElementById('location-display');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        const accuracyInput = document.getElementById('accuracy');
+
+        getLocationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                locationDisplay.innerHTML = '<span style="color: #dc2626;">浏览器不支持定位功能</span>';
+                return;
+            }
+
+            locationDisplay.innerHTML = '<span>⏳ 正在获取位置...</span>';
+            getLocationBtn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    const acc = Math.round(position.coords.accuracy);
+
+                    latitudeInput.value = lat;
+                    longitudeInput.value = lng;
+                    accuracyInput.value = acc;
+
+                    locationDisplay.innerHTML = `
+                        <span style="color: #059669;">✅ 定位成功</span><br>
+                        纬度: ${lat}°<br>
+                        经度: ${lng}°<br>
+                        精度: ±${acc}米
+                    `;
+                    fetchRegion(lat, lng);
+                    updateMap(lat, lng);
+                    getLocationBtn.disabled = false;
+                },
+                function(error) {
+                    let msg = '定位失败';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            msg = '用户拒绝位置权限';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            msg = '位置信息不可用';
+                            break;
+                        case error.TIMEOUT:
+                            msg = '获取位置逾时';
+                            break;
+                    }
+                    locationDisplay.innerHTML = `<span style="color: #dc2626;">❌ ${msg}</span>`;
+                    getLocationBtn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }); // GPS 定位功能结束
+
+        // === 地址地理编码功能（地址 -> 坐标）===
+        const geocodeManualBtn = document.getElementById('geocode-manual-btn');
+        const addressInput = document.getElementById('address-input');
+        const geocodeStatus = document.getElementById('geocode-status');
+
+        function geocodeAddress(address) {
+            if (!address.trim()) {
+                geocodeStatus.innerHTML = '<span style="color: #dc2626;">⚠️ 请输入地址</span>';
+                return;
+            }
+
+            geocodeStatus.innerHTML = '<span>⏳ 正在查询...</span>';
+            geocodeManualBtn.disabled = true;
+
+            // 使用 OpenStreetMap Nominatim 搜索 API
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
+                headers: {
+                    'User-Agent': 'HermesSurvey/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    throw new Error('未找到该地址');
+                }
+
+                const result = data[0];
+                const lat = parseFloat(result.lat).toFixed(6);
+                const lng = parseFloat(result.lon).toFixed(6);
+
+                // 填充隐藏字段
+                latitudeInput.value = lat;
+                longitudeInput.value = lng;
+                accuracyInput.value = ''; // 地理编码不提供精度
+
+                // 更新显示
+                locationDisplay.innerHTML = `
+                    <span style="color: #059669;">✅ 地址转换成功</span><br>
+                    纬度: ${lat}°<br>
+                    经度: ${lng}°<br>
+                    地址: ${result.display_name}
+                `;
+
+                // 获取地区信息
+                fetchRegion(lat, lng);
+
+                // 更新地图
+                updateMap(lat, lng);
+
+                geocodeStatus.innerHTML = '<span style="color: #059669;">✓ 完成</span>';
+            })
+            .catch(error => {
+                console.error('地理编码失败:', error);
+                geocodeStatus.innerHTML = '<span style="color: #dc2626;">❌ ' + error.message + '</span>';
+            })
+            .finally(() => {
+                geocodeManualBtn.disabled = false;
+            });
+        }
+
+        // 绑定按钮事件（仅在手动转换按钮上）
+        geocodeManualBtn.addEventListener('click', function() {
+            geocodeAddress(addressInput.value);
+        });
+
+        // 支持在地址框按 Enter 提交
+        addressInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                geocodeAddress(addressInput.value);
+            }
+        });
+
+        // Submissions display logic
+        const viewSubmissionsBtn = document.getElementById('view-submissions-btn');
+        const submissionsPanel = document.getElementById('submissions-panel');
+        const startDateInput = document.getElementById('submission-start-date');
+        const endDateInput = document.getElementById('submission-end-date');
+        const filterBtn = document.getElementById('submission-filter-btn');
+        const closeBtn = document.getElementById('submission-close-btn');
+        const tableBody = document.querySelector('#submissions-table tbody');
+        const emptyDiv = document.getElementById('submissions-empty');
+        const loadingDiv = document.getElementById('submissions-loading');
+
+        // Search and pagination elements
+        const searchInput = document.getElementById('submission-search');
+        const searchClearBtn = document.getElementById('submission-search-clear');
+        const paginationInfo = document.getElementById('pagination-info');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+
+        // Pagination state
+        let currentPage = 1;
+        const pageSize = 20; // 每页显示 20 条
+        let totalPages = 0;
+        let totalRows = 0;
+
+        // Submissions panel click counter (require 5 clicks within 0.5 second)
+        const VIEW_SUBMISSIONS_CLICKS_REQUIRED = 5;
+        const VIEW_SUBMISSIONS_CLICK_TIMEOUT_MS = 500; // 0.5 second
+        let viewSubmissionsClickCount = 0;
+        let viewSubmissionsLastClickTime = 0;
+
+        // Set default date to today (Hong Kong time)
+        const today = getHKDateString();
+        startDateInput.value = today;
+        endDateInput.value = today;
+
+        function showPanel() {
+            submissionsPanel.style.display = 'block';
+            loadSubmissions();
+        }
+
+        function hidePanel() {
+            submissionsPanel.style.display = 'none';
+        }
+
+        async function loadSubmissions() {
+            tableBody.innerHTML = '';
+            emptyDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            try {
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                let url = '/api/submissions';
+                if (startDate && endDate) {
+                    url += `?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+                } else if (startDate) {
+                    url += `?start_date=${encodeURIComponent(startDate)}`;
+                } else if (endDate) {
+                    url += `?end_date=${encodeURIComponent(endDate)}`;
+                }
+                const response = await fetch(url);
+                const result = await response.json();
+                loadingDiv.style.display = 'none';
+                if (result.success && result.total > 0) {
+                    currentData = result.rows;
+                } else {
+                    currentData = [];
+                }
+                applyFiltersAndSort();
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                emptyDiv.style.display = 'block';
+                emptyDiv.textContent = '加载失败: ' + error.message;
+            }
+        }
+
+        // ===== Sorting support =====
+        const columnTypes = {
+            timestamp: 'date',
+            date: 'date',
+            weekend_holiday: 'string',
+            session: 'string',
+            status: 'string',
+            status_specify_others: 'string',
+            location: 'string',
+            work: 'string',
+            work_specify_others: 'string',
+            comments: 'string'
+        };
+
+        let currentSort = { field: null, asc: true };
+        let currentData = [];
+
+        function sortData(data, field, asc) {
+            return data.slice().sort((a, b) => {
+                let valA = a[field];
+                let valB = b[field];
+
+                if (valA == null && valB == null) return 0;
+                if (valA == null) return asc ? 1 : -1;
+                if (valB == null) return asc ? -1 : 1;
+
+                const type = columnTypes[field] || 'string';
+
+                if (type === 'date') {
+                    const dateA = new Date(valA).getTime();
+                    const dateB = new Date(valB).getTime();
+                    return asc ? dateA - dateB : dateB - dateA;
+                }
+
+                const strA = String(valA);
+                const strB = String(valB);
+                return asc ? strA.localeCompare(strB, 'zh') : strB.localeCompare(strA, 'zh');
+            });
+        }
+
+        function updateSortIcons() {
+            document.querySelectorAll('#submissions-table th[data-field]').forEach(th => {
+                const field = th.getAttribute('data-field');
+                th.classList.remove('sort-asc', 'sort-desc');
+                const indicator = th.querySelector('.sort-indicator');
+                if (indicator) indicator.textContent = '';
+                if (currentSort.field === field) {
+                    th.classList.add(currentSort.asc ? 'sort-asc' : 'sort-desc');
+                    if (indicator) indicator.textContent = currentSort.asc ? '▲' : '▼';
+                }
+            });
+        }
+
+        // Render rows utility
+        function renderRows(rows) {
+            tableBody.innerHTML = '';
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(row.timestamp)}</td>
+                    <td>${escapeHtml(row.name)}</td>
+                    <td>${escapeHtml(row.date)}</td>
+                    <td>${escapeHtml(row.weekend_holiday)}</td>
+                    <td>${escapeHtml(row.session)}</td>
+                    <td>${escapeHtml(row.status)}</td>
+                    <td>${escapeHtml(row.status_specify_others)}</td>
+                    <td>${escapeHtml(row.location)}</td>
+                    <td>${escapeHtml(row.work)}</td>
+                    <td>${escapeHtml(row.work_specify_others)}</td>
+                    <td>${escapeHtml(row.contract_no)}</td>
+                    <td>${escapeHtml(row.contract_specify_others)}</td>
+                    <td>${escapeHtml(row.comments)}</td>
+                    <td><button class="btn-delete" data-timestamp="${escapeHtml(row.timestamp)}">删除</button></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function applyFiltersAndSort() {
+            let filtered = currentData.slice();
+
+            // Apply search filter
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                const lower = searchTerm.toLowerCase();
+                filtered = filtered.filter(row =>
+                    Object.values(row).some(val =>
+                        String(val).toLowerCase().includes(lower)
+                    )
+                );
+            }
+
+            // Apply sorting
+            if (currentSort.field) {
+                filtered = sortData(filtered, currentSort.field, currentSort.asc);
+            }
+
+            // Update totals
+            totalRows = filtered.length;
+            totalPages = Math.ceil(totalRows / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages > 0 ? totalPages : 1;
+            }
+
+            // Render current page
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filtered.slice(start, end);
+
+            if (totalRows === 0) {
+                emptyDiv.style.display = 'block';
+                emptyDiv.textContent = '暂无数据';
+                tableBody.innerHTML = '';
+            } else {
+                emptyDiv.style.display = 'none';
+                renderRows(pageData);
+            }
+
+            updatePaginationInfo();
+            updatePaginationButtons();
+        }
+
+        function updatePaginationInfo() {
+            paginationInfo.textContent = totalRows > 0 ? `共 ${totalRows} 条，第 ${currentPage}/${totalPages} 页` : '共 0 条';
+        }
+
+        function updatePaginationButtons() {
+            prevPageBtn.disabled = currentPage <= 1;
+            nextPageBtn.disabled = currentPage >= totalPages;
+        }
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Search input listener (防抖 300ms)
+        const debouncedSearch = debounce(() => {
+            currentPage = 1;
+            applyFiltersAndSort();
+        }, 300);
+        searchInput.addEventListener('input', debouncedSearch);
+
+        // Clear search button
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentPage = 1;
+            applyFiltersAndSort();
+        });
+
+        // Pagination navigation
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                applyFiltersAndSort();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                applyFiltersAndSort();
+            }
+        });
+
+
+        // ============ 导出筛选结果功能 ============
+        // Global state for export
+        const currentFilters = {
+            search: '',
+            start_date: '',
+            end_date: '',
+            sort_field: '',
+            sort_asc: true
+        };
+
+        // Modify loadSubmissions to capture filter state
+        const originalLoadSubmissions = loadSubmissions;
+        loadSubmissions = async function() {
+            // Call original function (which loads data and calls applyFiltersAndSort)
+            await originalLoadSubmissions();
+
+            // After loading, update currentFilters based on current UI values
+            currentFilters.search = searchInput.value.trim();
+            currentFilters.start_date = startDateInput.value;
+            currentFilters.end_date = endDateInput.value;
+            if (currentSort.field) {
+                currentFilters.sort_field = currentSort.field;
+                currentFilters.sort_asc = currentSort.asc;
+            } else {
+                currentFilters.sort_field = '';
+                currentFilters.sort_asc = true;
+            }
+        };
+
+            // Export button handler
+            const exportBtn = document.getElementById('export-filtered-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', async function() {
+                if (totalRows === 0) {
+                    alert('当前筛选结果无数据');
+                    return;
+                }
+                // Request password
+                const pwd = prompt('请输入管理密码以导出数据：', '');
+                if (!pwd) return;
+
+                // Show loading state
+                exportBtn.disabled = true;
+                const originalText = exportBtn.textContent;
+                exportBtn.textContent = '导出中...';
+
+                try {
+                    const res = await fetch('/api/submissions/export', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ ...currentFilters, password: pwd })
+                    });
+
+                    if (res.status === 403) {
+                        alert('密码错误');
+                        return;
+                    }
+                    if (!res.ok) {
+                        const err = await res.json();
+                        alert('导出失败：' + (err.error || '未知错误'));
+                        return;
+                    }
+
+                    // Get total rows from header
+                    const totalRows = res.headers.get('X-Total-Rows');
+                    if (confirm(`将导出 ${totalRows} 条记录。是否下载？`)) {
+                        const blob = await res.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        // Extract filename from Content-Disposition
+                        const disposition = res.headers.get('Content-Disposition');
+                        let filename = 'submissions_export.csv';
+                        if (disposition) {
+                            const match = disposition.match(/filename\*?=([^;]+)/);
+                            if (match) {
+                                filename = decodeURIComponent(match[1].replace(/^UTF-8''/, '').replace(/"/g, ''));
+                            } else {
+                                const match2 = disposition.match(/filename="?([^"]+)"?/);
+                                if (match2) filename = match2[1];
+                            }
+                        }
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }
+                } catch (err) {
+                    alert('网络错误：' + err.message);
+                } finally {
+                    exportBtn.disabled = false;
+                    exportBtn.textContent = originalText;
+                }
+            });
+        }
+
+        // Bind header clicks for sorting
+        document.querySelectorAll('#submissions-table th[data-field]').forEach(th => {
+            th.addEventListener('click', function() {
+                const field = this.getAttribute('data-field');
+                if (!field) return;
+
+                if (currentSort.field === field) {
+                    currentSort.asc = !currentSort.asc;
+                } else {
+                    currentSort.field = field;
+                    currentSort.asc = true;
+                }
+                updateSortIcons();
+                currentPage = 1;
+                applyFiltersAndSort();
+            });
+        });
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        if (viewSubmissionsBtn) viewSubmissionsBtn.addEventListener('click', function() {
+            const now = Date.now();
+            
+            // 检查是否在时间窗口内
+            if (now - viewSubmissionsLastClickTime > VIEW_SUBMISSIONS_CLICK_TIMEOUT_MS) {
+                // 超过3秒，重置计数
+                viewSubmissionsClickCount = 0;
+            }
+            viewSubmissionsLastClickTime = now;
+            
+            viewSubmissionsClickCount++;
+            
+            if (viewSubmissionsClickCount >= VIEW_SUBMISSIONS_CLICKS_REQUIRED) {
+                viewSubmissionsClickCount = 0;
+                const params = new URLSearchParams();
+                const today = getHKDateString();
+                params.set('view', 'submissions');
+                params.set('start_date', startDateInput.value);
+                params.set('end_date', endDateInput.value);
+                window.open('/?' + params.toString(), '_blank', 'width=1200,height=800');
+            }
+        });
+        if (closeBtn) closeBtn.addEventListener('click', hidePanel);
+
+        // === 下拉菜单清除/重設功能 ===
+        document.querySelectorAll('.select-with-clear').forEach(wrapper => {
+            const select = wrapper.querySelector('select');
+            if (!select) return;
+            // 存储初始值（页面加载时的值）
+            const initialValue = select.value;
+            select.dataset.initial = initialValue;
+
+            function updateClearButtonVisibility() {
+                if (select.value && select.value !== initialValue) {
+                    wrapper.classList.add('has-value');
+                } else {
+                    wrapper.classList.remove('has-value');
+                }
+            }
+
+            // 初始化按钮显示
+            updateClearButtonVisibility();
+
+            // 清除按钮点击事件：重置为初始值
+            const clearBtn = wrapper.querySelector('.clear-select-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    select.value = initialValue;
+                    select.dispatchEvent(new Event('change'));
+                    updateClearButtonVisibility();
+                });
+            }
+
+            // 监听 select 变化
+            select.addEventListener('change', updateClearButtonVisibility);
+        });
+        // === 下拉菜单清除功能结束 ===
+
+        // 日期过滤自动触发（防抖 300ms）
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        const debouncedLoadSubmissions = debounce(() => {
+            loadSubmissions();
+        }, 300);
+        if (startDateInput) startDateInput.addEventListener('change', debouncedLoadSubmissions);
+        if (endDateInput) endDateInput.addEventListener('change', debouncedLoadSubmissions);
+        // If opened as submissions view, auto-show panel
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === 'submissions') {
+            const startDate = urlParams.get('start_date') || getHKDateString();
+            const endDate = urlParams.get('end_date') || getHKDateString();
+            if (startDateInput) startDateInput.value = startDate;
+            if (endDateInput) endDateInput.value = endDate;
+            document.querySelector('header') && (document.querySelector('header').style.display = 'none');
+            const form = document.getElementById('survey-form');
+            form && (form.style.display = 'none');
+            showPanel();
+        }
+    initMap();
+    // 自动设置日期为香港今天（页面加载时）
+    const autoDateInput = document.getElementById('date');
+    if (autoDateInput) {
+        autoDateInput.value = getHKDateString();
+    }
+
+    // ==================== Settings Modal Logic ====================
+    (function() {
+        const settingsBtn = document.getElementById('settings-btn');
+        const modal = document.getElementById('settings-modal');
+        const closeBtn = document.getElementById('close-settings-btn');
+        const cancelBtn = document.getElementById('cancel-settings-btn');
+        const saveBtn = document.getElementById('save-settings-btn');
+        const passwordInput = document.getElementById('admin-password');
+        const nameTextarea = document.getElementById('settings-names');
+        const statusTextarea = document.getElementById('settings-statuses');
+        const workTypesTextarea = document.getElementById('settings-work-types');
+        const contractsTextarea = document.getElementById('settings-contracts');
+        const messageEl = document.getElementById('settings-message');
+
+        function setSettingsMessage(msg, type) {
+            if (!messageEl) return;
+            messageEl.textContent = msg;
+            messageEl.className = 'settings-message';
+            if (type) messageEl.classList.add(type);
+            messageEl.style.display = msg ? 'block' : 'none';
+        }
+
+        function openSettings() {
+            setSettingsMessage('', '');
+            fetch('/api/options')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.options) {
+                        const opt = data.options;
+                        nameTextarea.value = (opt.names || []).join('\n');
+                        statusTextarea.value = (opt.statuses || []).join('\n');
+                        workTypesTextarea.value = (opt.work_types || []).join('\n');
+                        contractsTextarea.value = (opt.contracts || []).join('\n');
+                    } else {
+                        setSettingsMessage('加载配置失败: ' + (data.error || '未知错误'), 'error');
+                    }
+                })
+                .catch(err => {
+                    setSettingsMessage('网络错误: ' + err.message, 'error');
+                });
+            modal.style.display = 'flex';
+            if (passwordInput) passwordInput.value = '';
+        }
+
+        function closeSettings() {
+            modal.style.display = 'none';
+        }
+
+        function saveSettings() {
+            const pwd = passwordInput.value;
+            if (!pwd) {
+                setSettingsMessage('请输入管理密码', 'error');
+                return;
+            }
+            setSettingsMessage('正在保存...', 'info');
+            const newOptions = {
+                names: nameTextarea.value.split('\n').map(s => s.trim()).filter(s => s),
+                statuses: statusTextarea.value.split('\n').map(s => s.trim()).filter(s => s),
+                work_types: workTypesTextarea.value.split('\n').map(s => s.trim()).filter(s => s),
+                contracts: contractsTextarea.value.split('\n').map(s => s.trim()).filter(s => s)
+            };
+            fetch('/api/options', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Password': pwd
+                },
+                body: JSON.stringify(newOptions)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setSettingsMessage('✅ 配置已保存，正在刷新...', 'success');
+                    closeSettings();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    setSettingsMessage('保存失败: ' + (data.error || '未知错误'), 'error');
+                }
+            })
+            .catch(err => {
+                setSettingsMessage('网络错误: ' + err.message, 'error');
+            });
+        }
+
+        if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
+        if (closeBtn) closeBtn.addEventListener('click', closeSettings);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeSettings);
+        if (saveBtn) saveBtn.addEventListener('click', saveSettings);
+        modal && modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeSettings();
+        });
+    })();
+    </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 事件委托处理删除按钮点击
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-delete')) {
+            const timestamp = e.target.getAttribute('data-timestamp');
+            if (!timestamp) return;
+            if (confirm('确定要删除这条记录吗？此操作不可撤销。')) {
+                const pwd = prompt('请输入管理密码：', '');
+                if (pwd === null) return;
+                fetch(`/api/submissions/${encodeURIComponent(timestamp)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Password': pwd
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('删除成功');
+                        if (typeof loadSubmissions === 'function') {
+                            loadSubmissions();
+                        }
+                    } else {
+                        alert('删除失败: ' + (result.error || '未知错误'));
+                    }
+                })
+                .catch(err => {
+                    alert('网络错误: ' + err.message);
+                });
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

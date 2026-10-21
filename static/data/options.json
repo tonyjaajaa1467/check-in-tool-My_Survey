@@ -1,0 +1,37 @@
+{
+  "names": [
+    "Tony",
+    "Dan",
+    "Cheng",
+    "Simon",
+    "Kenny"
+  ],
+  "statuses": [
+    "On Duty",
+    "Not On Duty",
+    "Annual Leave",
+    "Compensation Leave",
+    "Birthday Leave",
+    "Sick Leave",
+    "Substituted Public Holiday Leave",
+    "Other_Status"
+  ],
+  "work_types": [
+    "Preventive Maintenance (PM)",
+    "Corrective Maintenance (CM)",
+    "Training Course",
+    "Exam",
+    "Meeting",
+    "On-Site Inspection",
+    "On-Site Repair",
+    "Installation",
+    "Testing & Commissioning",
+    "Other_Work"
+  ],
+  "contracts": [
+    "contract_1",
+    "contract_2",
+    "contract_3",
+    "Other_Contract"
+  ]
+}

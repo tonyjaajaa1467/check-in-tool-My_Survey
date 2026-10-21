@@ -1,0 +1,79 @@
+ * Tip: There are .env files present. Install python-dotenv to use them.
+问卷后端启动于 https://localhost:7979
+数据目录：/home/tony/.hermes/workspace/My_Survey/survey_data
+WebDAV 上传：https://127.0.0.1:5000/Comba-Share-Folder/004_Survey_Data/
+ * Serving Flask app 'backend'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on https://127.0.0.1:7979
+ * Running on https://192.168.100.180:7979
+[33mPress CTRL+C to quit[0m
+210.3.137.51 - - [21/Oct/2026 11:19:17] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:19:17] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:19:21] "GET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:19:21] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:19:21] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+182.239.90.119 - - [21/Oct/2026 11:19:35] "GET / HTTP/1.1" 200 -
+182.239.90.119 - - [21/Oct/2026 11:19:39] "GET / HTTP/1.1" 200 -
+182.239.90.119 - - [21/Oct/2026 11:19:39] "GET /static/data/options.json HTTP/1.1" 200 -
+182.239.119.171 - - [21/Oct/2026 11:19:40] "GET / HTTP/1.1" 200 -
+182.239.119.171 - - [21/Oct/2026 11:19:40] "GET /static/data/options.json HTTP/1.1" 200 -
+/home/tony/.hermes/workspace/My_Survey/venv/lib/python3.11/site-packages/urllib3/connectionpool.py:1110: InsecureRequestWarning: Unverified HTTPS request is being made to host '127.0.0.1'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[WebDAV] 上传CSV: success=True, message=上传成功
+182.239.119.171 - - [21/Oct/2026 11:20:12] "POST /submit HTTP/1.1" 200 -
+/home/tony/.hermes/workspace/My_Survey/venv/lib/python3.11/site-packages/urllib3/connectionpool.py:1110: InsecureRequestWarning: Unverified HTTPS request is being made to host '127.0.0.1'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[WebDAV] 上传CSV: success=True, message=上传成功
+182.239.90.119 - - [21/Oct/2026 11:20:23] "POST /submit HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:20:26] "[36mGET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:20:26] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:20:26] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+182.239.119.171 - - [21/Oct/2026 11:20:31] "POST /download_csv HTTP/1.1" 200 -
+/home/tony/.hermes/workspace/My_Survey/venv/lib/python3.11/site-packages/urllib3/connectionpool.py:1110: InsecureRequestWarning: Unverified HTTPS request is being made to host '127.0.0.1'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[WebDAV] 上传CSV: success=True, message=上传成功
+182.239.90.119 - - [21/Oct/2026 11:20:31] "POST /submit HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:20:45] "POST /download_csv HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:20:45] "[31m[1mHEAD /download_csv HTTP/1.1[0m" 403 -
+210.3.137.51 - - [21/Oct/2026 11:20:53] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:20:53] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:21:51] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:21:51] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:21:54] "[36mGET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:21:54] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:21:55] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:35:30] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:30] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:44] "GET / HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:35:44] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:46] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:47] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:49] "[36mGET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:49] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:35:49] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+210.3.137.51 - - [21/Oct/2026 11:39:15] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:39:15] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:40:22] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:40:22] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:42:38] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:42:38] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:43:16] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:43:16] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:43:31] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 11:43:31] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 12:00:13] "[36mGET / HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 12:00:13] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 12:00:17] "[36mGET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 12:00:17] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+210.3.137.51 - - [21/Oct/2026 12:00:17] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -
+118.140.60.50 - - [21/Oct/2026 13:49:19] "[36mGET / HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 13:49:19] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 13:54:49] "[36mGET / HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 13:54:49] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 14:38:16] "[36mGET / HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 14:38:16] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 14:38:20] "[36mGET /?view=submissions&start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 14:38:20] "[36mGET /static/data/options.json HTTP/1.1[0m" 304 -
+118.140.60.50 - - [21/Oct/2026 14:38:20] "GET /api/submissions?start_date=2026-10-21&end_date=2026-10-21 HTTP/1.1" 200 -

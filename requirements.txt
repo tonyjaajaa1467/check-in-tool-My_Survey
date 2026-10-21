@@ -1,0 +1,8 @@
+# My_Survey 项目依赖
+# 使用 pip install -r requirements.txt 安装
+
+# 核心依赖
+Flask>=2.0
+
+# 可选依赖（WebDAV 同步）
+requests>=2.25.0
