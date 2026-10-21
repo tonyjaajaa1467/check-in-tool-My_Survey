@@ -103,7 +103,7 @@ pip install flask
 | 变量名 | 必需 | 默认 | 说明 |
 |--------|------|------|------|
 | `DOWNLOAD_PASSWORD` | 是 | — | CSV 下载和导出筛选的密码 |
-| `OPTIONS_PASSWORD` | 否 | 同 `DOWNLOAD_PASSWORD` | 编辑 `options.json` 的管理密码 |
+| `OPTIONS_PASSWORD` | 否 | — | 编辑 `options.json` 的管理密码 |
 | `FLASK_DEBUG` | 否 | `0` | 调试模式（生产设为 0） |
 | `PORT` | 否 | `5001` | 后端监听端口 |
 | `SSL_CERT_PATH` | 否 | `ssl/cert.pem` | SSL 证书路径 |
