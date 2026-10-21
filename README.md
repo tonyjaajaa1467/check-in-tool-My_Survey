@@ -44,6 +44,11 @@ cd /home/$USER/My_Survey
 
 确保 Python 3.8+ 和 pip 可用。
 
+```bash
+sudo apt update
+sudo apt install python3 python3-pip
+```
+
 ### 2. 配置环境变量
 
 复制示例配置并编辑：
