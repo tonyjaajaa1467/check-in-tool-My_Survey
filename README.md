@@ -66,7 +66,12 @@ SSL_KEY_PATH=ssl/key.pem
 PORT="5001"
 ```
 
-### 3. 安装依赖
+### 3. 建立新的虛擬環境
+```bash
+python3 -m venv venv
+```
+
+### 4. 安装依赖
 
 ```bash
 pip install -r requirements.txt
@@ -74,7 +79,7 @@ pip install -r requirements.txt
 pip install flask
 ```
 
-### 4. 启动服务
+### 5. 启动服务
 
 ```bash
 ./run_backend.sh start
@@ -90,7 +95,7 @@ pip install flask
 🌐 地址: https://localhost:5001
 ```
 
-### 5. 访问页面
+### 6. 访问页面
 
 浏览器打开 `https://localhost:5001`（首次访问自签名证书需手动信任）。
 
