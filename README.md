@@ -38,10 +38,6 @@ My_Survey 是一个轻量级的表单提交与数据管理系统，适用于打�
 
 ### 1. 准备工作
 
-```bash
-cd /home/$USER/My_Survey
-```
-
 确保 Python 3.8+ 和 pip 可用。
 
 ```bash
@@ -49,23 +45,19 @@ sudo apt update
 sudo apt install python3 python3-pip
 ```
 
-### 2. 配置环境变量
-
-`.env` 文件至少需要设置：
+使用 git 下載腳本文件 (如沒有, 請運行 sudo apt install git 安裝):
 
 ```bash
-DOWNLOAD_PASSWORD=your_download_password
-SSL_CERT_PATH=ssl/cert.pem
-SSL_KEY_PATH=ssl/key.pem
-PORT="5001"
+git clone https://github.com/tonyjaajaa1467/check-in-tool-My_Survey.git My_Survey
+cd My_Survey
 ```
 
-### 3. 建立新的虛擬環境
+### 2. 建立新的虛擬環境
 ```bash
 python3 -m venv venv
 ```
 
-### 4. 啟用虛擬環境
+### 3. 啟用虛擬環境
 - **在 Bash 或 Zsh 中：**
   ```bash
   source venv/bin/activate
@@ -88,13 +80,13 @@ python3 -m venv venv
 (venv) tony@host:~/My_Survey$
 ```
 
-### 5. 安裝依賴套件
+### 4. 安裝依賴套件
 ```bash
 pip install -r requirements.txt
 ```
 `requirements.txt` 檔案目前僅包含 `flask`（核心依賴），但若未來有更新，此步驟會確保安裝所有必要套件。
 
-### 6. 驗證安裝
+### 5. 驗證安裝
 您可以透過以下指令檢查 Flask 是否已正確安裝：
 ```bash
 pip list | grep flask
@@ -102,6 +94,17 @@ pip list | grep flask
 或執行：
 ```bash
 python -c "import flask; print(flask.__version__)"
+```
+
+### 6. 配置环境变量
+
+`.env` 文件至少需要设置：
+
+```bash
+DOWNLOAD_PASSWORD=your_download_password
+SSL_CERT_PATH=ssl/cert.pem
+SSL_KEY_PATH=ssl/key.pem
+PORT="5001"
 ```
 
 ### 7. 启动服务
