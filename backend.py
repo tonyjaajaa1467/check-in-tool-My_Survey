@@ -434,10 +434,14 @@ if __name__ == '__main__':
     init_csv()
     debug = os.getenv('FLASK_DEBUG', '0') == '1'
     port = int(os.getenv('PORT', '5001'))
-    print(f"问卷后端启动于 https://localhost:{port}")
+    ssl_cert = os.getenv('SSL_CERT_PATH', os.path.join(BASE_DIR, 'ssl', 'cert.pem'))
+    ssl_key = os.getenv('SSL_KEY_PATH', os.path.join(BASE_DIR, 'ssl', 'key.pem'))
+    ssl_context = (ssl_cert, ssl_key) if (os.path.exists(ssl_cert) and os.path.exists(ssl_key)) else None
+    proto = 'https' if ssl_context else 'http'
+    print(f"问卷后端启动于 {proto}://localhost:{port}")
     print(f"数据目录：{DATA_DIR}")
     if WEBDAV_URL:
         print(f"WebDAV 上传：{WEBDAV_URL}")
     else:
         print("WebDAV 未配置（可设定环境变数)")
-    app.run(host='0.0.0.0', port=port, debug=debug, ssl_context=(os.getenv('SSL_CERT_PATH', os.path.join(BASE_DIR, 'ssl', 'cert.pem')), os.getenv('SSL_KEY_PATH', os.path.join(BASE_DIR, 'ssl', 'key.pem'))))
+    app.run(host='0.0.0.0', port=port, debug=debug, ssl_context=ssl_context)

@@ -38,9 +38,14 @@ start() {
 
     sleep 1
     if kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+        if [ -f "ssl/cert.pem" ] && [ -f "ssl/key.pem" ]; then
+            PROTO="https"
+        else
+            PROTO="http"
+        fi
         echo "✅ 后端已启动 (PID $(cat $PID_FILE))"
         echo "📍 路径: $(pwd)/backend.py"
-        echo "🌐 地址: https://localhost:$PORT"
+        echo "🌐 地址: ${PROTO}://localhost:$PORT"
     else
         echo "❌ 启动失败，请查看日志："
         tail -n 30 "$LOG_FILE" 2>/dev/null || echo "无日志文件"
