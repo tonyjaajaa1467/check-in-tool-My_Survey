@@ -65,15 +65,46 @@ PORT="5001"
 python3 -m venv venv
 ```
 
-### 4. 安装依赖
+### 4. 啟用虛擬環境
+- **在 Bash 或 Zsh 中：**
+  ```bash
+  source venv/bin/activate
+  ```
+- **在 Fish shell 中：**
+  ```bash
+  source venv/bin/activate.fish
+  ```
+- **在 Windows Command Prompt 中：**
+  ```cmd
+  venv\Scripts\activate.bat
+  ```
+- **在 Windows PowerShell 中：**
+  ```powershell
+  venv\Scripts\Activate.ps1
+  ```
 
-```bash
-pip install -r requirements.txt
-# 或仅安装核心依赖
-pip install flask
+啟用成功後，終端機提示符會顯示 `(venv)` 前綴，例如：
+```
+(venv) tony@host:~/My_Survey$
 ```
 
-### 5. 启动服务
+### 5. 安裝依賴套件
+```bash
+pip install -r requirements.txt
+```
+`requirements.txt` 檔案目前僅包含 `flask`（核心依賴），但若未來有更新，此步驟會確保安裝所有必要套件。
+
+### 6. 驗證安裝
+您可以透過以下指令檢查 Flask 是否已正確安裝：
+```bash
+pip list | grep flask
+```
+或執行：
+```bash
+python -c "import flask; print(flask.__version__)"
+```
+
+### 7. 启动服务
 
 ```bash
 ./run_backend.sh start
