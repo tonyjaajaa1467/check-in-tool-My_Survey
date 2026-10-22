@@ -51,12 +51,6 @@ sudo apt install python3 python3-pip
 
 ### 2. 配置环境变量
 
-复制示例配置并编辑：
-
-```bash
-cp .env.example .env
-```
-
 `.env` 文件至少需要设置：
 
 ```bash
