@@ -107,9 +107,10 @@ SSL_KEY_PATH=ssl/key.pem
 PORT="5001"
 ```
 
-### 7. 啟動服務
+### 7. 執行權限 & 啟動服務
 
 ```bash
+chmod +x run_backend.sh
 ./run_backend.sh start
 ```
 
